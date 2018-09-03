@@ -1,11 +1,15 @@
 const utils = require('../utils.js');
 
 function checkStreaming(oldPresence, newPresence) {
-    let newMember = newPresence.member,
-        oldMember = oldPresence.member,
-        guild = newMember.guild,        
-        newActivityType = utils.get(newMember, 'presence.activity.type'),
-        oldActivityType = utils.get(oldMember, 'presence.activity.type'),
+    let newMember = newPresence.member;
+
+    if (!newMember) {
+        console.log(newPresence);
+        return;
+    }
+
+    let guild = newMember.guild,
+        newActivityType = utils.get(newPresence, 'activity.type'),
         promise;
 
     if (!guild.streamingRole) {
