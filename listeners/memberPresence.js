@@ -38,8 +38,9 @@ function checkStreaming(oldPresence, newPresence) {
         });
 
         let streamingChannel = guild.channels.find(channel => {
-            return channel.name === 'livestreaming' && channel.type === 'text';
+            return channel.name === 'now-streaming' && channel.type === 'text';
         });
+
         if (streamingMembersUrl.length > 0) {
             streamingChannel.setTopic('MultiTwitch link: http://multitwitch.tv/' + streamingMembersUrl.join('/'));
         } else {
