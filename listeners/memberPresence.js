@@ -10,8 +10,7 @@ function checkStreaming(oldPresence, newPresence) {
     let guild = newMember.guild,
         newActivityType = utils.get(newPresence, 'activity.type'),
         oldActivityType = utils.get(oldPresence, 'activity.type'),
-        promise,
-        memberWentLive = false;
+        promise;
 
     if (!guild.streamingRole) {
         guild.streamingRole = guild.roles.find(role => role.name === 'now-streaming');
@@ -29,17 +28,12 @@ function checkStreaming(oldPresence, newPresence) {
     }
 
     if (newActivityType === 'STREAMING') {
-        if (oldActivityType !== 'STREAMING') {
-            //let url = utils.get(newPresence, 'activity.url');
-            //streamingChannel.send(newMember.displayName + ' has gone live. Check it out at <' + url + '>');
-            memberWentLive = true;
-        }
         promise = newMember.roles.add(guild.streamingRole);
     } else {
         promise = newMember.roles.remove(guild.streamingRole);
     }
 
-    promise.then(() => {    
+    function afterRoleChange() {    
         let streamingMembersUrl = [];
         guild.streamingRole.members.forEach(member => {
             let activityUrl = utils.get(member, 'presence.activity.url');
@@ -54,13 +48,18 @@ function checkStreaming(oldPresence, newPresence) {
         if (streamingMembersUrl.length > 0) {
             let url = 'http://multitwitch.tv/' + streamingMembersUrl.join('/');
             streamingChannel.setTopic('MultiTwitch link: ' + url);
-            if (memberWentLive) {
+
+            if (newActivityType === 'STREAMING' && oldActivityType !== 'STREAMING') {
                 streamingChannel.send('@here ' + newMember.displayName + ' has gone live at <' + utils.get(newPresence, 'activity.url') + '>\n\nThe updated multitwitch link is <' + url + '>');
+            } else {
+                console.log(`${newMember.displayName} - ${new Date().toString()}\n  New: ${newActivityType}\n  Old: ${oldActivityType}`);
             }
         } else {
             streamingChannel.setTopic('Theres nobody streaming...');
         }
-    });
+    }
+
+    promise.then(afterRoleChange).catch(afterRoleChange);
 
 }
 
