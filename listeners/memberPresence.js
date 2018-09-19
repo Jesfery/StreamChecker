@@ -15,6 +15,7 @@ function checkStreaming(oldPresence, newPresence) {
     if (!guild.streamingRole) {
         guild.streamingRole = guild.roles.find(role => role.name === 'now-streaming');
         if (!guild.streamingRole) {
+            console.log(`${guild.name} - now-streaming role not found`);
             return;
         }
     }
@@ -24,6 +25,7 @@ function checkStreaming(oldPresence, newPresence) {
     });
 
     if (!streamingChannel) {
+        console.log(`${guild.name} - now-streaming channel not found`);
         return;
     }
 
@@ -51,8 +53,6 @@ function checkStreaming(oldPresence, newPresence) {
 
             if (newActivityType === 'STREAMING' && oldActivityType !== 'STREAMING') {
                 streamingChannel.send('@here ' + newMember.displayName + ' has gone live at <' + utils.get(newPresence, 'activity.url') + '>\n\nThe updated multitwitch link is <' + url + '>');
-            } else {
-                console.log(`${newMember.displayName} - ${new Date().toString()}\n  New: ${newActivityType}\n  Old: ${oldActivityType}`);
             }
         } else {
             streamingChannel.setTopic('Theres nobody streaming...');
