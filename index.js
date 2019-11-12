@@ -9,7 +9,7 @@ const memberPresenceListener = require('./listeners/memberPresence.js');
 
 const client = new Discord.Client();
 
-client.on('ready', () => {
+client.once('ready', () => {
     commandListener.init(client);
     memberPresenceListener.init(client);
     console.log('Ready!');
