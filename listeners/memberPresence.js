@@ -41,9 +41,9 @@ function checkStreaming(oldPresence, newPresence) {
     function afterRoleChange() {    
         let streamingMembersUrl = [];
         guild.streamingRole.members.forEach(member => {
-            let activityUrl = utils.get(member, 'presence.activity.url');
+            let activityUrl = utils.get(member, 'presence.activity.url') || '';
 
-            if (activityUrl && activityUrl.length > 0 && activityUrl.indexOf('https://www.twitch.tv/') === 0) {
+            if (activityUrl.indexOf('https://www.twitch.tv/') === 0) {
                 activityUrl = activityUrl.split('/');
                 activityUrl = activityUrl[activityUrl.length -1];
                 streamingMembersUrl.push(activityUrl);
@@ -56,9 +56,6 @@ function checkStreaming(oldPresence, newPresence) {
             cooldowns.set(memberId, now);
             setTimeout(() => cooldowns.delete(memberId), cooldownAmount);
             let message = '@here \n\n' + newMember.displayName + ' has gone live at <' + utils.get(newPresence, 'activity.url') + '>';
-            if (streamingMembersUrl.length > 0) {
-                message += '\n\nThe updated MultiTwitch link is <' + url + '>';
-            }
             streamingChannel.send(message);
         }
 
