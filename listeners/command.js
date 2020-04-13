@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const fs = require('fs');
-const { prefix } = require('../config.json');
+const prefix = process.env.COMMAND_PREFIX;
 
 module.exports = {
     init: function(client) {

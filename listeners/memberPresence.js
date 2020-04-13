@@ -11,28 +11,29 @@ function checkStreaming(oldPresence, newPresence) {
     }
 
     let guild = newMember.guild,
-        newActivityType = utils.get(newPresence, 'activity.type'),
-        oldActivityType = utils.get(oldPresence, 'activity.type'),
         promise;
 
     if (!guild.streamingRole) {
-        guild.streamingRole = guild.roles.find(role => role.name === 'now-streaming');
+        guild.streamingRole = guild.roles.cache.find(role => role.name === 'now-streaming');
         if (!guild.streamingRole) {
             console.log(`${guild.name} - now-streaming role not found`);
             return;
         }
     }
 
-    let streamingChannel = guild.channels.find(channel => {
+    let streamingChannel = guild.channels.cache.find(channel => {
         return channel.name === 'now-streaming' && channel.type === 'text';
     });
 
     if (!streamingChannel) {
         console.log(`${guild.name} - now-streaming channel not found`);
         return;
-    }
+    }    
 
-    if (newActivityType === 'STREAMING') {
+    let activity = getStreamingActivity(newPresence);
+    let oldActivity = getStreamingActivity(oldPresence);
+
+    if (activity != null) {
         promise = newMember.roles.add(guild.streamingRole);
     } else {
         promise = newMember.roles.remove(guild.streamingRole);
@@ -41,9 +42,10 @@ function checkStreaming(oldPresence, newPresence) {
     function afterRoleChange() {    
         let streamingMembersUrl = [];
         guild.streamingRole.members.forEach(member => {
-            let activityUrl = utils.get(member, 'presence.activity.url') || '';
+            let a = getStreamingActivity(member.presence),
+                activityUrl = a && a.url;
 
-            if (activityUrl.indexOf('https://www.twitch.tv/') === 0) {
+            if (activityUrl && activityUrl.indexOf('https://www.twitch.tv/') === 0) {
                 activityUrl = activityUrl.split('/');
                 activityUrl = activityUrl[activityUrl.length -1];
                 streamingMembersUrl.push(activityUrl);
@@ -52,10 +54,10 @@ function checkStreaming(oldPresence, newPresence) {
 
         const now = Date.now();
         const memberId = newMember.id;
-        if (newActivityType === 'STREAMING' && oldActivityType !== 'STREAMING' && !cooldowns.has(memberId)) {
+        if (activity && !oldActivity && !cooldowns.has(memberId)) {
             cooldowns.set(memberId, now);
             setTimeout(() => cooldowns.delete(memberId), cooldownAmount);
-            let message = '@here \n\n' + newMember.displayName + ' has gone live at <' + utils.get(newPresence, 'activity.url') + '>';
+            let message = '@here \n\n' + newMember.displayName + ' has gone live at <' + activity.url + '>';
             streamingChannel.send(message);
         }
 
@@ -69,6 +71,19 @@ function checkStreaming(oldPresence, newPresence) {
 
     promise.then(afterRoleChange).catch(afterRoleChange);
 
+}
+
+function getStreamingActivity(presence) {
+    let activity = null;
+
+    presence && presence.activities.every(a => {
+        if (a.type === 'STREAMING') {
+            activity = a;
+            return false;
+        }
+    });
+
+    return activity;
 }
 
 module.exports = {

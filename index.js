@@ -1,5 +1,6 @@
+require('dotenv').config();
+
 const Discord = require('discord.js');
-const { token } = require('./config.json');
 
 const commandListener = require('./listeners/command.js');
 const memberPresenceListener = require('./listeners/memberPresence.js');
@@ -20,4 +21,4 @@ client.once('ready', () => {
     console.log('Ready at ' + new Date());
 });
 
-client.login(token);
+client.login(process.env.DISCORD_TOKEN);
