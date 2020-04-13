@@ -32,8 +32,8 @@ module.exports = {
 
             let streamingMembersUrl = [];
             streamingRole.members.forEach(member => {
-                let activity = getStreamingActivity(member.presence),
-                    activityUrl = activity.url;
+                let a = getStreamingActivity(member.presence),
+                    activityUrl = a.url;
 
                 if (activityUrl && activityUrl.indexOf('https://www.twitch.tv/') === 0) {
                     activityUrl = activityUrl.split('/');
