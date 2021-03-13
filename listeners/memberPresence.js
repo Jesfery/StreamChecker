@@ -76,11 +76,11 @@ function checkStreaming(oldPresence, newPresence) {
 function getStreamingActivity(presence) {
     let activity = null;
 
-    presence && presence.activities.forEach(a => {
-        if (a.type === 'STREAMING') {
-            activity = a;
-            return false;
+    presence && presence.activities.every(a => {
+        if (a.type !== 'STREAMING') {
+            return true;
         }
+        activity = a;
     });
 
     return activity;
